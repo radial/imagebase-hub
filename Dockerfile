@@ -11,9 +11,7 @@ MAINTAINER      Brian Clements <brian@brianclements.net>
 # "CONFIG_REPO="` to download a configuration at runtime.
 ENV CONFIG_REPO none
 
-VOLUME          ["/config"]
-VOLUME          ["/data"]
-VOLUME          ["/log"]
+VOLUME          ["/config", "/data", "/log"]
 
 # Make everything permissive so Spoke containers are free to use other system
 # users to run their applications. Note: running this container interactively
@@ -45,9 +43,7 @@ ONBUILD RUN     test -f /build-env && source /build-env || true
 ONBUILD RUN     wget --no-check-certificate -P /config/ $CONFIG_REPO >/dev/null 2>&1 || true
 
 # Expose our VOLUME directories
-ONBUILD VOLUME  ["/config"]
-ONBUILD VOLUME  ["/data"]
-ONBUILD VOLUME  ["/log"]
+ONBUILD VOLUME  ["/config", "/data", "/log"]
 
 # Make everything permissive so Spoke containers are free to use other system
 # users to run their applications. Note: running this container interactively

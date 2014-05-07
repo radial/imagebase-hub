@@ -1,5 +1,5 @@
 # Dockerfile for Hub-Base
-FROM            radial/busyboxplus-curl
+FROM            radial/busyboxplus
 MAINTAINER      Brian Clements <brian@brianclements.net>
 
 # Dynamic data mode: run from image.
@@ -10,6 +10,7 @@ MAINTAINER      Brian Clements <brian@brianclements.net>
 # exposed volumes are deleted when the containers are removed. Run with `-e
 # "CONFIG_REPO="` to download a configuration at runtime.
 ENV CONFIG_REPO none
+ENV CONFIG_BRANCH none
 
 VOLUME          ["/config", "/data", "/log"]
 
@@ -17,8 +18,8 @@ VOLUME          ["/config", "/data", "/log"]
 # users to run their applications. Note: running this container interactively
 # and changing the `CMD` like `docker run -it radial/hub-base sh` will omit
 # this step and file permissions are not guaranteed to be uniform.
-CMD         wget --no-check-certificate -P /config/ $CONFIG_REPO >/dev/null 2>&1 &&\
-            chmod 644 -R /config /data /log >/dev/null 2>&1
+CMD             git clone $CONFIG_REPO -b $CONFIG_BRANCH /config >/dev/null 2>&1 &&\
+                chmod 644 -R /config /data /log >/dev/null 2>&1
 
 
 # Static data mode: built from Dockerfile
@@ -40,7 +41,7 @@ ONBUILD ADD     . /
 ONBUILD RUN     test -f /build-env && source /build-env || true
 
 # Pull our configuration
-ONBUILD RUN     wget --no-check-certificate -P /config/ $CONFIG_REPO >/dev/null 2>&1 || true
+ONBUILD RUN     git clone $CONFIG_REPO -b $CONFIG_BRANCH /config >/dev/null 2>&1 || true
 
 # Expose our VOLUME directories
 ONBUILD VOLUME  ["/config", "/data", "/log"]

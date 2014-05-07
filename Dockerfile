@@ -1,6 +1,6 @@
 # Dockerfile for Hub-Base
 FROM            radial/busyboxplus
-MAINTAINER      Brian Clements <brian@brianclements.net>
+MAINTAINER      Brian Clements <radial@brianclements.net>
 
 # Dynamic data mode: run from image.
 #

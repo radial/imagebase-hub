@@ -45,23 +45,24 @@ ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
 # ------------------------------------------------------------------------------
 # Static data mode: built from Dockerfile
 #
-# With one line, `FROM radial/hub-base` in a new Dockerfile, all files from
-# context directory are loaded into the container at build time in their
-# respective folders ('/config', '/data', and '/log'). Those directories are
-# then shared via "VOLUME" after their contents have already been ADDed. This
-# means the files are now subject to version control within docker AND WILL
-# PERSIST AS PART OF THE RESULTING IMAGE. Not just stored temporarily in the
-# running container. 
+# With one line, `FROM radial/hub-base` in a new Dockerfile, all files in
+# '/config' are uploaded into '/config' in the hub-container. Only later are the
+# '/config', along with '/data', and '/log' directories declared with 'VOLUME'.
+# This means that the files uploaded into '/config' are now subject to version
+# control within docker AND WILL PERSIST AS PART OF THE RESULTING IMAGE. Not
+# just stored temporarily in the running container. 
 
-# Add all files in context to / of container. This includes your Dockerfile,
-# your build-env file (a file that contains ENV vars needed for our build
-# including specifying a custom Supervisor skeleton and/or Wheel repository),
-# and any directories and their contents. Normally, only a 'config' folder needs
-# to be added.
-ONBUILD ADD     . /
+# Add the contents of the '/config' folder as well as your build-env file (a
+# file that contains ENV vars needed for our build, if any, as well as to
+# specify a custom Supervisor skeleton and/or Wheel repository at build time).
+ONBUILD ADD     /config /config
+ONBUILD ADD     /build-env /build-env
 
-# Make the just ADDed files a git repository so we can merge outside
-# configuration into it.
+# Create our other VOLUME directories
+ONBUILD RUN     mkdir /data /log
+
+# Make the just ADDed files in '/config' a git repository so we can merge
+# outside configuration into it.
 ONBUILD RUN     git init && git add . && git commit -m "Configuration from ADD files" 
 
 # If not explicitly using 'ADD' for configuration files, we need to source
@@ -79,7 +80,7 @@ ONBUILD RUN     test -f /build-env && source /build-env;\
 
 ONBUILD RUN     chmod 644 -R /config /data /log
 
-# Expose our VOLUME directories
+# Share our VOLUME directories
 ONBUILD VOLUME  ["/config", "/data", "/log"]
 
 ONBUILD ENTRYPOINT /bin/sh

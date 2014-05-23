@@ -4,7 +4,7 @@
 # and manage application configuration. It is split into two sections: Dynamic
 # data mode for command line usage only, and static data mode for use as a
 # Dockerfile.
-FROM            radial/busyboxplus
+FROM            radial/busyboxplus:git
 MAINTAINER      Brian Clements <radial@brianclements.net>
 
 # Default configuration for supervisor.

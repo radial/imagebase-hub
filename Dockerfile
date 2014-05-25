@@ -66,13 +66,11 @@ ONBUILD RUN     mkdir /data /log
 ONBUILD RUN     git init && git add . && git commit -m "Configuration from ADD files" 
 
 # If not explicitly using 'ADD' for configuration files, we need to source
-# 'build-env' for the location of our configuration repository at the start of
-# every command before it can pull our configuration.
+# 'build-env' for the location of our configuration so we can pull our
+# configuration from those locations.
 ONBUILD RUN     test -f /build-env && source /build-env;\
                 git remote add supervisor $SUPERVISOR_REPO &&\
-                git pull --no-edit supervisor $SUPERVISOR_BRANCH
-
-ONBUILD RUN     test -f /build-env && source /build-env;\
+                git pull --no-edit supervisor $SUPERVISOR_BRANCH &&\
                 if [ $WHEEL_REPO != "none" ]; then\
                     git remote add wheel $WHEEL_REPO &&\
                     git pull --no-edit wheel $WHEEL_BRANCH;\

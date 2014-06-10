@@ -32,40 +32,47 @@ WORKDIR         /config
 #    merge the Supervisor skeleton and our Wheel configuration together.
 # 3) Set up file and folder permissions accordingly
 ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
-                    echo "...succesfully cloned Supervisor skeleton config.";echo"";\
+                    echo "...successfully cloned Supervisor skeleton config.";echo"";\
                 if [ $WHEEL_REPO == "none" ]; then\
                     echo "warning: no Wheel repository is set. This hub has no configuration"; else\
-                git remote add wheel $WHEEL_REPO &&\
-                git pull --no-edit wheel $WHEEL_BRANCH; fi;\
+                    git remote add wheel $WHEEL_REPO &&\
+                    git pull --no-edit wheel $WHEEL_BRANCH; fi;\
                 find /config -type d -print0 | xargs -0 chmod 755 &&\
                 find /config -type f -print0 | xargs -0 chmod 644 &&\
-                echo""; echo "...file permissions succesfully applied to '/config'."
+                echo""; echo "...file permissions successfully applied to '/config'."
 
+# NOTE: if you run this image dynamically, you must manually share the volumes
+# '/config', '/data', and '/log' if not using --volumes-from another Axle
+# container.
 
 # ------------------------------------------------------------------------------
 # Static data mode: built from Dockerfile
 #
 # With one line, `FROM radial/hub-base` in a new Dockerfile, all files in
-# '/config' are uploaded into '/config' in the hub-container. Only later are the
-# '/config', along with '/data', and '/log' directories declared with 'VOLUME'.
-# This means that the files uploaded into '/config' are now subject to version
-# control within docker AND WILL PERSIST AS PART OF THE RESULTING IMAGE. Not
-# just stored temporarily in the running container. 
+# '/config' and '/data' are uploaded into '/config' and '/data' respectively in
+# the hub-container. Only later are the '/config', '/data', as well as '/log'
+# directories declared with 'VOLUME'.  This means that the files uploaded into
+# '/config' and '/data' are now subject to version control within docker AND
+# WILL PERSIST AS PART OF THE RESULTING IMAGE. Not just stored temporarily in
+# the running container. 
 
-# Add the contents of the '/config' folder as well as your build-env file (a
-# file that contains ENV vars needed for our build, if any, as well as to
-# specify a custom Supervisor skeleton and/or Wheel repository at build time).
+# 1) Add the contents of the '/config' and '/data' folders
+# 2) Add the build-env file (a file that contains ENV vars needed for our
+#    build, if any as well as to specify a custom Supervisor skeleton and/or
+#    Wheel repository at build time).
 ONBUILD COPY    /config /config
+ONBUILD COPY    /data /data
 ONBUILD COPY    /build-env /build-env
 
-# Create our other VOLUME directories
-ONBUILD RUN     mkdir /data /log
+# Create the '/log' directory as a backup in case we don't use a log Axle
+# container.
+ONBUILD RUN     mkdir /log
 
-# Make the just ADDed files in '/config' a git repository so we can merge
+# Make the copied files in '/config' a git repository so we can merge
 # outside configuration into it.
 ONBUILD RUN     git init && git add . && git commit -m "Configuration from ADD files" 
 
-# If not explicitly using 'ADD' for configuration files, we need to source
+# If not explicitly using 'COPY' for configuration files, we need to source
 # 'build-env' for the location of our configuration so we can pull our
 # configuration from those locations.
 ONBUILD RUN     test -f /build-env && source /build-env;\

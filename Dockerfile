@@ -37,8 +37,8 @@ ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
                     echo "warning: no Wheel repository is set. This hub has no configuration"; else\
                     git remote add wheel $WHEEL_REPO &&\
                     git pull --no-edit wheel $WHEEL_BRANCH; fi;\
-                find /config -type d -print0 | xargs -0 chmod 755 &&\
-                find /config -type f -print0 | xargs -0 chmod 644 &&\
+                find /config -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755 &&\
+                find /config -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644 &&\
                 echo""; echo "...file permissions successfully applied to '/config'."
 
 # NOTE: if you run this image dynamically, you must manually share the volumes
@@ -84,8 +84,8 @@ ONBUILD RUN     test -f /build-env && source /build-env;\
                 fi
 
 # Set up file and folder permissions
-ONBUILD RUN     find /config /data /log -type d -print0 | xargs -0 chmod 755 &&\
-                find /config /data /log -type f -print0 | xargs -0 chmod 644
+ONBUILD RUN     find /config /data /log -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755 &&\
+                find /config /data /log -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
 
 # Share our VOLUME directories
 ONBUILD VOLUME  ["/config", "/data", "/log"]

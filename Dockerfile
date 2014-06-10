@@ -30,15 +30,15 @@ WORKDIR         /config
 # 1) Clone the /config skeleton containing our default Supervisor configuration.
 # 2) Add the location of our wheel repository and pull the 'config' branch to
 #    merge the Supervisor skeleton and our Wheel configuration together.
-# 3) Make all files permissive so Spoke containers are free to use other system
-#    users to run their applications.
+# 3) Set up file and folder permissions accordingly
 ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
                     echo "...succesfully cloned Supervisor skeleton config.";echo"";\
                 if [ $WHEEL_REPO == "none" ]; then\
                     echo "warning: no Wheel repository is set. This hub has no configuration"; else\
                 git remote add wheel $WHEEL_REPO &&\
                 git pull --no-edit wheel $WHEEL_BRANCH; fi;\
-                chmod 644 -R /config /data /log &&\
+                find /config -type d -print0 | xargs -0 chmod 755 &&\
+                find /config -type f -print0 | xargs -0 chmod 644 &&\
                 echo""; echo "...file permissions succesfully applied to '/config'."
 
 
@@ -76,7 +76,9 @@ ONBUILD RUN     test -f /build-env && source /build-env;\
                     git pull --no-edit wheel $WHEEL_BRANCH;\
                 fi
 
-ONBUILD RUN     chmod 644 -R /config /data /log
+# Set up file and folder permissions
+ONBUILD RUN     find /config /data /log -type d -print0 | xargs -0 chmod 755 &&\
+                find /config /data /log -type f -print0 | xargs -0 chmod 644
 
 # Share our VOLUME directories
 ONBUILD VOLUME  ["/config", "/data", "/log"]

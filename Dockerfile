@@ -55,8 +55,8 @@ ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
 # Add the contents of the '/config' folder as well as your build-env file (a
 # file that contains ENV vars needed for our build, if any, as well as to
 # specify a custom Supervisor skeleton and/or Wheel repository at build time).
-ONBUILD ADD     /config /config
-ONBUILD ADD     /build-env /build-env
+ONBUILD COPY    /config /config
+ONBUILD COPY    /build-env /build-env
 
 # Create our other VOLUME directories
 ONBUILD RUN     mkdir /data /log

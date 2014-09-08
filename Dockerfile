@@ -11,6 +11,17 @@ MAINTAINER      Brian Clements <radial@brianclements.net>
 ENV             SUPERVISOR_REPO https://github.com/radial/config-supervisor.git
 ENV             SUPERVISOR_BRANCH master
 
+# Recreate /run to Ubuntu specifications since it will be Ubuntu systems
+# that actually use this directory via an exposed volume, not busybox.
+WORKDIR         /run
+RUN             mkdir -p -m 755 network/interface resolvconf sendsigs.omit.d shm sshd &&\
+                mkdir -m 777 lock &&\
+                touch motd.dynamic utmp &&\
+                chmod 644 motd.dynamic utmp &&\
+                chmod 664 utmp &&\
+                chown root:102 network &&\
+                chown root:utmp utmp
+
 #-------------------------------------------------------------------------------
 # Dynamic data mode: run from image.
 #
@@ -42,8 +53,9 @@ ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
                 echo""; echo "...file permissions successfully applied to '/config'."
 
 # NOTE: if you run this image dynamically, you must manually share the volumes
-# '/config', '/data', and '/log' if not using --volumes-from another Axle
-# container.
+# '/config', '/data', '/log', and '/run' (if your Spokes need to communicate
+# via sockets) if not using --volumes-from another Axle container that shares
+# these directories already.
 
 # ------------------------------------------------------------------------------
 # Static data mode: built from Dockerfile
@@ -88,6 +100,6 @@ ONBUILD RUN     find /config /data /log -type d -not -path "*/.git*" -print0 | x
                 find /config /data /log -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
 
 # Share our VOLUME directories
-ONBUILD VOLUME  ["/config", "/data", "/log"]
+ONBUILD VOLUME  ["/config", "/data", "/log", "/run"]
 
 ONBUILD ENTRYPOINT /bin/sh

@@ -7,6 +7,9 @@
 FROM            radial/busyboxplus:git
 MAINTAINER      Brian Clements <radial@brianclements.net>
 
+# Simple program to keep the container alive and do nothing
+COPY            IDLE /usr/bin/IDLE
+
 # Default configuration for supervisor.
 ENV             SUPERVISOR_REPO https://github.com/radial/config-supervisor.git
 ENV             SUPERVISOR_BRANCH master

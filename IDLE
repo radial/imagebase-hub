@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# This program is used to keep docker volume containers "up". While grabbing
+# foreground to keep the container alive, the following command also "seems" to
+# use 0 CPU in the process.
+
+echo "Container will now idle."
+exec /usr/bin/tail -f /dev/null

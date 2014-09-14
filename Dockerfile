@@ -28,50 +28,66 @@ RUN             mkdir -p -m 755 network/interface resolvconf sendsigs.omit.d shm
                 chown root:102 network &&\
                 chown root:utmp utmp
 
+
 #-------------------------------------------------------------------------------
 # Dynamic data mode: run from image.
+# ------------------------------------------------------------------------------
 #
-# `docker pull radial/hub-base` yields a non-versioned hub image that can be run
-# "as is" and later linked up at run time via '--volumes-from' with it's Spoke
-# container. All data stored in this container's exposed volumes are deleted
-# when the containers are removed. Run with `-e
-# "WHEEL_REPO=https://path.to.your/wheel/repo.git"` to download a configuration
-# at runtime. Your configuration should have it's own branch in your wheel
-# repository, named "config" by default, with it's relative root being /config.
-ENV             WHEEL_REPO none
-ENV             WHEEL_BRANCH config
-
-WORKDIR         /config
+# `docker pull radial/hub-base` yields a non-versioned hub image that can be
+# run "as is" and later linked up at run time via '--volumes-from' with it's
+# Spoke container. All data stored in this container's exposed volumes are
+# deleted when the containers are removed. 
+# 
+# Run with `-e "WHEEL_REPO=https://path.to.your/wheel/repo.git"` to download a
+# configuration at runtime. You can specify multiple "WHEEL_REPO"
+# configurations to download by appending something unique to "WHEEL_REPO". For
+# example, "WHEEL_REPO_APP1" and "WHEEL_REPO_APP2" would work together.
+#
+# Your configuration should have it's own branch in your wheel repository,
+# named "config" by default, with it's relative root being /config. If other
+# branches are to be used, they must be prefixed with "WHEEL_BRANCH" with their 
+# identifying segment identical to "WHEEL_REPO". "WHEEL_BRANCH_APP1" and
+# WHEEL_BRANCH_APP2" for example. If no "WHEEL_BRANCH" variables are set, then the
+# defualt branch "config" is used for each "WHEEL_REPO".
 
 # When run from the image directly, the resulting container will:
 # 1) Clone the /config skeleton containing our default Supervisor configuration.
-# 2) Add the location of our wheel repository and pull the 'config' branch to
-#    merge the Supervisor skeleton and our Wheel configuration together.
+# 2) Add the location of our wheel repository(s) and pull their config branches
+#    to merge the Supervisor skeleton and our Wheel configuration(s) together.
 # 3) Set up file and folder permissions accordingly
+# 4) Run our idling program
 COPY            /hub-entrypoint.sh /hub-entrypoint.sh
 
 ENTRYPOINT      ["/hub-entrypoint.sh", "dynamic"]
 
 # NOTE: if you run this image dynamically, you must manually share the volumes
 # '/config', '/data', '/log', and '/run' (if your Spokes need to communicate
-# via sockets) if not using --volumes-from another Axle container that shares
-# these directories already.
+# via sockets) if not already using `--volumes-from` other Axle containers
+# that share these directories already.
+
+
 
 # ------------------------------------------------------------------------------
 # Static data mode: built from Dockerfile
+# ------------------------------------------------------------------------------
 #
-# With one line, `FROM radial/hub-base` in a new Dockerfile, all files in
-# '/config' and '/data' are uploaded into '/config' and '/data' respectively in
-# the hub-container. Only later are the '/config', '/data', as well as '/log'
-# directories declared with 'VOLUME'.  This means that the files uploaded into
-# '/config' and '/data' are now subject to version control within docker AND
-# WILL PERSIST AS PART OF THE RESULTING IMAGE. Not just stored temporarily in
-# the running container. 
+# With one line, `FROM radial/hub-base` in a new Dockerfile, all files in the
+# context are uploaded to the hub-container. Care must be taken to keep to the
+# /config, /data/, /log, /run folder structure so that the files will upload
+# correctly. Use a '.dockerignore' file in the hub folder to exclude items in
+# the context from uploading.
+#
+# Create a file named 'build-env' and add it to the hub folder to insert
+# additional ENV variables into our build. The variables here can be used to
+# specify a custom Supervisor skeleton repository, additional wheel
+# repository(s), or alternate branch repositories at build time. It will be
+# copied along with the contents of your '/config', '/data', and any other
+# folders you create in the context.
 
-# 1) Add the contents of the '/config' and '/data' folders
-# 2) Add the build-env file (a file that contains ENV vars needed for our
-#    build, if any as well as to specify a custom Supervisor skeleton and/or
-#    Wheel repository at build time).
+# Later, all these directories are exposed with 'VOLUME'. This means that the
+# files uploaded from the context are now subject to version control within
+# docker AND WILL PERSIST AS PART OF THE RESULTING IMAGE. Not just stored
+# temporarily in the running container. 
 ONBUILD COPY    / /
 
 # Create the '/log' directory as a backup in case we don't use a log Axle

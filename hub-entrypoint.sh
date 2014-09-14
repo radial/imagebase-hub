@@ -75,9 +75,14 @@ launch() {
 
     echo "Wheel repositories updated."
 
+    rmdir /run/hub.lock
+
     exec IDLE
 }
 
+
+# Spoke containers will wait for Hub to finish loading before running.
+mkdir -p /run/hub.lock
 
 case "${1}" in
 
@@ -128,6 +133,8 @@ case "${1}" in
         fi
 
         apply_permissions
+
+        rmdir /run/hub.lock
         ;;
 
     static-update)

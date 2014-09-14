@@ -48,15 +48,9 @@ WORKDIR         /config
 # 2) Add the location of our wheel repository and pull the 'config' branch to
 #    merge the Supervisor skeleton and our Wheel configuration together.
 # 3) Set up file and folder permissions accordingly
-ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
-                    echo "...successfully cloned Supervisor skeleton config.";echo"";\
-                if [ $WHEEL_REPO == "none" ]; then\
-                    echo "warning: no Wheel repository is set. This hub has no configuration"; else\
-                    git remote add wheel $WHEEL_REPO &&\
-                    git pull --no-edit wheel $WHEEL_BRANCH; fi;\
-                find /config -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755 &&\
-                find /config -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644 &&\
-                echo""; echo "...file permissions successfully applied to '/config'."
+COPY            /hub-entrypoint.sh /hub-entrypoint.sh
+
+ENTRYPOINT      ["/hub-entrypoint.sh", "dynamic"]
 
 # NOTE: if you run this image dynamically, you must manually share the volumes
 # '/config', '/data', '/log', and '/run' (if your Spokes need to communicate
@@ -78,9 +72,7 @@ ENTRYPOINT      git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&\
 # 2) Add the build-env file (a file that contains ENV vars needed for our
 #    build, if any as well as to specify a custom Supervisor skeleton and/or
 #    Wheel repository at build time).
-ONBUILD COPY    /config /config
-ONBUILD COPY    /data /data
-ONBUILD COPY    /build-env /build-env
+ONBUILD COPY    / /
 
 # Create the '/log' directory as a backup in case we don't use a log Axle
 # container.
@@ -88,24 +80,22 @@ ONBUILD RUN     mkdir /log
 
 # Make the copied files in '/config' a git repository so we can merge
 # outside configuration into it.
+ONBUILD WORKDIR /config
 ONBUILD RUN     git init && git add . && git commit -m "Configuration from COPY files" 
 
-# If not explicitly using 'COPY' for configuration files, we need to source
-# 'build-env' for the location of our configuration so we can pull our
-# configuration from those locations.
+# If not explicitly using 'COPY' for configuration files, or if combining files
+# locally and remotely, we need to source 'build-env' for the location of our
+# additional configuration so we can pull it from those locations. 'build-env'
+# is a series of `export SOME_VAR="value"` statements that is sourced before
+# running our setup script.
+#
+# After this, file permissions are set on all the /config, /data, and /log
+# directories.
+ONBUILD ENV     ENV /build-env
 ONBUILD RUN     test -f /build-env && source /build-env;\
-                git remote add supervisor $SUPERVISOR_REPO &&\
-                git pull --no-edit supervisor $SUPERVISOR_BRANCH &&\
-                if [ $WHEEL_REPO != "none" ]; then\
-                    git remote add wheel $WHEEL_REPO &&\
-                    git pull --no-edit wheel $WHEEL_BRANCH;\
-                fi
-
-# Set up file and folder permissions
-ONBUILD RUN     find /config /data /log -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755 &&\
-                find /config /data /log -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
+                /hub-entrypoint.sh static
 
 # Share our VOLUME directories
 ONBUILD VOLUME  ["/config", "/data", "/log", "/run"]
 
-ONBUILD ENTRYPOINT /bin/sh
+ONBUILD ENTRYPOINT ["/hub-entrypoint.sh", "static-update"]

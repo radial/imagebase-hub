@@ -13,6 +13,9 @@ ENV             SUPERVISOR_BRANCH master
 
 # Recreate /run to Ubuntu specifications since it will be Ubuntu systems
 # that actually use this directory via an exposed volume, not busybox.
+RUN             rm /run && rm /var/run &&\
+                mkdir -m 777 /run &&\
+                ln -s /run /var/run
 WORKDIR         /run
 RUN             mkdir -p -m 755 network/interface resolvconf sendsigs.omit.d shm sshd &&\
                 mkdir -m 777 lock &&\

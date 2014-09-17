@@ -45,11 +45,13 @@ apply_permissions() {
         # files.
 
         do_apply() {
-            find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755
-            if [ "$(ls -A $1)" != "" ]; then
-                find "$1" -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
+            if [ "$(find "$1" -type d -not -path "*/.git*")" ]; then
+                find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755
+                if [ "$(find "$1" -type f -not -path "*/.git*")" ]; then
+                    find "$1" -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
+                fi
+                echo "...file permissions successfully applied to $1."
             fi
-            echo "...file permissions successfully applied to $1."
         }
 
         if [ -d /config ]; then

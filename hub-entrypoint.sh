@@ -150,6 +150,8 @@ case "${1}" in
                 echo "Refreshing configuration from wheel repositories..."
                 launch
             fi
+            rmdir /run/hub.lock
+            exec IDLE
         fi
         ;;
 esac

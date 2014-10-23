@@ -2,7 +2,7 @@
 # There be shenanigans here to make this script work with busybox's ash shell.
 set -e
 
-UPDATES=${UPDATES:-false}
+UPDATES=${UPDATES:-"False"}
 
 restart_message() {
     echo "Container restart on $(date)."
@@ -41,28 +41,28 @@ pull_wheel_repos () {
 }
 
 apply_permissions() {
-        # Set file and folder permissions for all configuration and uploaded
-        # files.
+    # Set file and folder permissions for all configuration and uploaded
+    # files.
 
-        do_apply() {
-            if [ "$(find "$1" -type d -not -path "*/.git*")" ]; then
-                find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755
-                if [ "$(find "$1" -type f -not -path "*/.git*")" ]; then
-                    find "$1" -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
-                fi
-                echo "...file permissions successfully applied to $1."
+    do_apply() {
+        if [ "$(find "$1" -type d -not -path "*/.git*")" ]; then
+            find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755
+            if [ "$(find "$1" -type f -not -path "*/.git*")" ]; then
+                find "$1" -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
             fi
-        }
+            echo "...file permissions successfully applied to $1."
+        fi
+    }
 
-        if [ -d /config ]; then
-            do_apply /config
-        fi
-        if [ -d /data ]; then
-            do_apply /data
-        fi
-        if [ -d /log ]; then
-            do_apply /log
-        fi
+    if [ -d /config ]; then
+        do_apply /config
+    fi
+    if [ -d /data ]; then
+        do_apply /data
+    fi
+    if [ -d /log ]; then
+        do_apply /log
+    fi
 }
 
 
@@ -87,7 +87,6 @@ launch() {
 mkdir -p /run/hub.lock
 
 case "${1}" in
-
     dynamic)
         if [ ! -e /tmp/hub_first_run ]; then
             touch /tmp/hub_first_run
@@ -108,7 +107,7 @@ case "${1}" in
             launch
         else
             restart_message
-            if [ "$UPDATES" != "false" ]; then
+            if [ "$UPDATES" != "False" ]; then
                 echo "Refreshing configuration from wheel repositories..."
                 launch
             fi
@@ -146,7 +145,7 @@ case "${1}" in
             launch
         else
             restart_message
-            if [ "$UPDATES" != "false" ]; then
+            if [ "$UPDATES" != "False" ]; then
                 echo "Refreshing configuration from wheel repositories..."
                 launch
             fi

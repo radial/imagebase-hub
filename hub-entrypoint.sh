@@ -14,7 +14,7 @@ get_envs() {
     listLength=$(echo "$repoList" | wc -w)
 }
     
-pull_wheel_repos () {
+pull_wheel_repos() {
     # Pull all WHEEL_REPO repositories
     get_repo() {
         echo $(eval echo $(echo "\$$(echo "$repoList" | awk -v i=${i} 'NR==i')"))

@@ -2,7 +2,11 @@
 # There be shenanigans here to make this script work with busybox's ash shell.
 set -e
 
+# Tunable variables
 UPDATES=${UPDATES:-"False"}
+PERMISSIONS_DEFAULT_DIR=${PERMISSIONS_DEFAULT_DIR:-755}
+PERMISSIONS_DEFAULT_FILE=${PERMISSIONS_DEFAULT_FILE:-644}
+
 
 restart_message() {
     echo "Container restart on $(date)."
@@ -46,9 +50,9 @@ apply_permissions() {
 
     do_apply() {
         if [ "$(find "$1" -type d -not -path "*/.git*")" ]; then
-            find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod 755
+            find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod "$PERMISSIONS_DEFAULT_DIR"
             if [ "$(find "$1" -type f -not -path "*/.git*")" ]; then
-                find "$1" -type f -not -path "*/.git*" -print0 | xargs -0 chmod 644
+                find "$1" -type f -not -path "*/.git*" -print0 | xargs -0 chmod "$PERMISSIONS_DEFAULT_FILE"
             fi
             echo "...file permissions successfully applied to $1."
         fi
@@ -64,7 +68,6 @@ apply_permissions() {
         do_apply /log
     fi
 }
-
 
 launch() {
     cd /config

@@ -15,7 +15,7 @@ restart_message() {
 get_envs() {
     repoList=$(env | grep "WHEEL_REPO" | sort | awk -F "=" '{print $1}')
     branchList=$(env | grep "WHEEL_BRANCH" | sort | awk -F "=" '{print $1}')
-    listLength=$(echo "$repoList" | wc -w)
+    repoListLength=$(echo "$repoList" | wc -w)
 }
     
 pull_wheel_repos() {
@@ -36,7 +36,7 @@ pull_wheel_repos() {
     }
 
     i=1
-    while [ $i -le $((listLength)) ]; do
+    while [ $i -le $((repoListLength)) ]; do
         remoteName=$(date | md5sum | head -c10)
         git remote add ${remoteName} $(get_repo $i)
         git pull --no-edit ${remoteName} $(get_branch $i)

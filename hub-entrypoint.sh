@@ -78,7 +78,7 @@ launch() {
 
     apply_permissions
 
-    echo "Wheel repositories updated."
+    echo "Configuration setup complete."
 
     rmdir /run/hub.lock
 

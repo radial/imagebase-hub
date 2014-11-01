@@ -6,6 +6,7 @@ set -e
 UPDATES=${UPDATES:-"False"}
 PERMISSIONS_DEFAULT_DIR=${PERMISSIONS_DEFAULT_DIR:-755}
 PERMISSIONS_DEFAULT_FILE=${PERMISSIONS_DEFAULT_FILE:-644}
+PERMISSIONS_EXCEPTIONS=${PERMISSIONS_EXCEPTIONS:-''}
 
 
 restart_message() {
@@ -45,10 +46,10 @@ pull_wheel_repos() {
 }
 
 apply_permissions() {
-    # Set file and folder permissions for all configuration and uploaded
-    # files.
+    # Set default file and folder permissions for all configuration and
+    # uploaded files.
 
-    do_apply() {
+    apply_default_permissions() {
         if [ "$(find "$1" -type d -not -path "*/.git*")" ]; then
             find "$1" -type d -not -path "*/.git*" -print0 | xargs -0 chmod "$PERMISSIONS_DEFAULT_DIR"
             if [ "$(find "$1" -type f -not -path "*/.git*")" ]; then
@@ -59,14 +60,36 @@ apply_permissions() {
     }
 
     if [ -d /config ]; then
-        do_apply /config
+        apply_default_permissions /config
     fi
     if [ -d /data ]; then
-        do_apply /data
+        apply_default_permissions /data
     fi
     if [ -d /log ]; then
-        do_apply /log
+        apply_default_permissions /log
     fi
+
+    # Set file/folder permissions exceptions, if any
+    permExceptList=$(echo "$PERMISSIONS_EXCEPTIONS" | tr ' ' '\n' | sort -r )
+    permExceptListLength=$(echo "$permExceptList" | wc -w) 
+
+    get_entry() {
+        echo "$permExceptList" | awk -F ':' -v line="$1" -v item="$2" 'NR==line {print $item}'
+    }
+
+    i=1
+    while [ $i -le $((permExceptListLength)) ]; do
+        if [ $(get_entry $i 4) ]; then
+            chown $(get_entry $i 3):$(get_entry $i 4) $(get_entry $i 1)
+            echo "Changed $(get_entry $i 1) owner and group to $(get_entry $i 3):$(get_entry $i 4)"
+        elif [ $(get_entry $i 3) ]; then
+            chown $(get_entry $i 3) $(get_entry $i 1)
+            echo "Changed $(get_entry $i 1) owner to $(get_entry $i 3)"
+        fi
+        chmod $(get_entry $i 2) $(get_entry $i 1)
+        echo "Changed $(get_entry $i 1) permissions to $(get_entry $i 2)"
+        i=$((i + 1))
+    done
 }
 
 launch() {

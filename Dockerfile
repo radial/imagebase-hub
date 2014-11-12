@@ -97,7 +97,7 @@ ONBUILD RUN     mkdir -p /data /log
 # Make the copied files in '/config' a git repository so we can merge
 # outside configuration into it.
 ONBUILD WORKDIR /config
-ONBUILD RUN     git init && git add . && git commit -m "Configuration from COPY files" 
+ONBUILD RUN     git init && (git add . || git commit -m "Configuration from COPY files" || true)
 
 # If not explicitly using 'COPY' for configuration files, or if combining files
 # locally and remotely, we need to source 'build-env' for the location of our

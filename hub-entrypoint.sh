@@ -97,7 +97,12 @@ launch() {
     
     get_envs
 
-    pull_wheel_repos
+    # Warn if no Wheel repo(s) set; don't attempt to pull anything.
+    if [ "$repoList" = "" ]; then
+        echo "Warning: no Wheel repository(s) set. This hub has no configuration."
+    else
+        pull_wheel_repos
+    fi
 
     apply_permissions
 
@@ -119,12 +124,6 @@ case "${1}" in
 
             # Get ENV variables from cli
             get_envs
-
-            # Fail if no Wheel repo(s) set.
-            if [ "$repoList" = "" ]; then
-                echo "Warning: no Wheel repository(s) set. This hub has no configuration."
-                exit 1
-            fi
 
             # Clone supervisor skeleton
             git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&

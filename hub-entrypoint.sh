@@ -97,9 +97,11 @@ launch() {
     
     get_envs
 
-    # Warn if no Wheel repo(s) set; don't attempt to pull anything.
+    # Warn if no Wheel repo(s) set in dynamic mode; don't attempt to pull anything.
     if [ "$repoList" = "" ]; then
-        echo "Warning: no Wheel repository(s) set. This hub has no configuration."
+        if [ "$1" = "dynamic" ]; then
+            echo "Warning: no Wheel repository(s) set. This hub has no configuration."
+        fi
     else
         pull_wheel_repos
     fi
@@ -121,6 +123,7 @@ case "${1}" in
     dynamic)
         if [ ! -e /tmp/hub_first_run ]; then
             touch /tmp/hub_first_run
+            echo "hub is running in dynamic mode."
 
             # Get ENV variables from cli
             get_envs

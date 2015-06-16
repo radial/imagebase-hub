@@ -10,10 +10,6 @@ MAINTAINER      Brian Clements <radial@brianclements.net>
 # Simple program to keep the container alive and do nothing
 COPY            IDLE /usr/bin/IDLE
 
-# Default configuration for supervisor.
-ENV             SUPERVISOR_REPO https://github.com/radial/config-supervisor.git
-ENV             SUPERVISOR_BRANCH master
-
 # Recreate /run to Ubuntu specifications since it will be Ubuntu systems
 # that actually use this directory via an exposed volume, not busybox.
 RUN             rm /run && rm /var/run &&\
@@ -51,11 +47,10 @@ RUN             mkdir -p -m 755 network/interface resolvconf sendsigs.omit.d shm
 # defualt branch "config" is used for each "WHEEL_REPO".
 
 # When run from the image directly, the resulting container will:
-# 1) Clone the /config skeleton containing our default Supervisor configuration.
-# 2) Add the location of our wheel repository(s) and pull their config branches
-#    to merge the Supervisor skeleton and our Wheel configuration(s) together.
-# 3) Set up file and folder permissions accordingly
-# 4) Run our idling program
+# 1) Add the location of our wheel repository(s) and pull their config branches
+#    to merge our Wheel configuration(s) together.
+# 2) Set up file and folder permissions accordingly
+# 3) Run our idling program
 COPY            /hub-entrypoint.sh /hub-entrypoint.sh
 
 ENTRYPOINT      ["/hub-entrypoint.sh", "dynamic"]
@@ -79,10 +74,9 @@ ENTRYPOINT      ["/hub-entrypoint.sh", "dynamic"]
 #
 # Create a file named 'build-env' and add it to the hub folder to insert
 # additional ENV variables into our build. The variables here can be used to
-# specify a custom Supervisor skeleton repository, additional wheel
-# repository(s), or alternate branch repositories at build time. It will be
-# copied along with the contents of your '/config', '/data', and any other
-# folders you create in the context.
+# specify additional wheel repository(s) or alternate branch repositories at
+# build time. It will be copied along with the contents of your '/config',
+# '/data', and any other folders you create in the context.
 
 # Later, all these directories are exposed with 'VOLUME'. This means that the
 # files uploaded from the context are now subject to version control within

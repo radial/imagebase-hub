@@ -128,9 +128,9 @@ case "${1}" in
             # Get ENV variables from cli
             get_envs
 
-            # Clone supervisor skeleton
-            git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&
-                echo "...successfully cloned Supervisor skeleton config."
+            # Initialize our git config repo
+            git init /config
+                echo "...Initialized config repository."
 
             launch
         else

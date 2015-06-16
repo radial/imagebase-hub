@@ -5,4 +5,17 @@
 # use 0 CPU in the process.
 
 echo "Container will now idle."
-exec /usr/bin/tail -f /dev/null
+
+shutdown() {
+    echo "Container shutdown on $(date)"
+    kill -SIGTERM $(pidof tail)
+    exit
+}
+
+idle() {
+    /usr/bin/tail -f /dev/null
+}
+
+trap "shutdown" HUP INT QUIT KILL TERM
+
+idle & wait

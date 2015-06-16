@@ -139,6 +139,7 @@ case "${1}" in
                 echo "Refreshing configuration from wheel repositories..."
                 launch
             fi
+            exec IDLE
         fi
         ;;
 

@@ -51,9 +51,9 @@ RUN             mkdir -p -m 755 network/interface resolvconf sendsigs.omit.d shm
 #    to merge our Wheel configuration(s) together.
 # 2) Set up file and folder permissions accordingly
 # 3) Run our idling program
-COPY            /hub-entrypoint.sh /hub-entrypoint.sh
+COPY            /HUB /HUB
 
-ENTRYPOINT      ["/hub-entrypoint.sh", "dynamic"]
+ENTRYPOINT      ["/HUB", "dynamic"]
 
 # NOTE: if you run this image dynamically, you must manually share the volumes
 # '/config', '/data', '/log', and '/run' (if your Spokes need to communicate
@@ -104,9 +104,9 @@ ONBUILD RUN     git init && (git add .; git commit -m "Configuration from COPY f
 # directories.
 ONBUILD ENV     ENV /build-env
 ONBUILD RUN     test -f /build-env && source /build-env;\
-                /hub-entrypoint.sh static
+                /HUB static
 
 # Share our VOLUME directories
 ONBUILD VOLUME  ["/config", "/data", "/log", "/run"]
 
-ONBUILD ENTRYPOINT ["/hub-entrypoint.sh", "static-update"]
+ONBUILD ENTRYPOINT ["/HUB", "static-update"]

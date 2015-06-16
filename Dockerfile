@@ -81,7 +81,8 @@ ENTRYPOINT      ["/hub-entrypoint.sh", "dynamic"]
 # Later, all these directories are exposed with 'VOLUME'. This means that the
 # files uploaded from the context are now subject to version control within
 # docker AND WILL PERSIST AS PART OF THE RESULTING IMAGE. Not just stored
-# temporarily in the running container. 
+# temporarily in the running container. Use of a `.dockerignore` file is
+# encouraged here.
 ONBUILD COPY    / /
 
 # Create the '/log' directory as a backup in case we don't use a log Axle

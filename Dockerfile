@@ -72,7 +72,7 @@ ENTRYPOINT      ["/HUB", "dynamic"]
 # correctly. Use a '.dockerignore' file in the hub folder to exclude items in
 # the context from uploading.
 #
-# Create a file named 'build-env' and add it to the hub folder to insert
+# Create a file named 'build.env' and add it to the hub folder to insert
 # additional ENV variables into our build. The variables here can be used to
 # specify additional wheel repository(s) or alternate branch repositories at
 # build time. It will be copied along with the contents of your '/config',
@@ -95,15 +95,15 @@ ONBUILD WORKDIR /config
 ONBUILD RUN     git init && (git add .; git commit -m "Configuration from COPY files" || true)
 
 # If not explicitly using 'COPY' for configuration files, or if combining files
-# locally and remotely, we need to source 'build-env' for the location of our
-# additional configuration so we can pull it from those locations. 'build-env'
+# locally and remotely, we need to source 'build.env' for the location of our
+# additional configuration so we can pull it from those locations. 'build.env'
 # is a series of `export SOME_VAR="value"` statements that is sourced before
 # running our setup script.
 #
 # After this, file permissions are set on all the /config, /data, and /log
 # directories.
-ONBUILD ENV     ENV /build-env
-ONBUILD RUN     test -f /build-env && source /build-env;\
+ONBUILD ENV     ENV /build.env
+ONBUILD RUN     test -f /build.env && source /build.env;\
                 /HUB static
 
 # Share our VOLUME directories

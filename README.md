@@ -16,11 +16,8 @@ Check out the documentation
 
 Tunable environment variables; modify at runtime. Italics are defaults.
 
-  - **$SUPERVISOR_REPO**: [_https://github.com/radial/config-supervisor.git_]
-    Repository location for default Supervisor daemon configuration.
-  - **$SUPERVISOR_BRANCH**: [_master_] Repository default branch.
   - **[$WHEEL_REPO[_APP1]...]**: Additional repositories to download and merge
-    with the default SUPERVISOR_REPO repository.
+    with the initial blank configuration repository.
   - **[$WHEEL_BRANCH[_APP1]...]**: Branches to pull for given WHEEL_REPO
     repositories.
   - **$UPDATES**: [_False_|True] Update configuration from the selected
@@ -37,6 +34,6 @@ Tunable environment variables; modify at runtime. Italics are defaults.
       `chmod` so things like `/config/*` work for directory contents and numeric
       user and group ids work as well.
     - Some examples:
-        - `/config/supervisor/conf.d/*:700`
-        - `/config/supervisor/supervisord.conf:700:root:root`
-        - `/config/supervisor/myprogram.conf:777:myprogramuser`
+        - `/config/someapp/conf.d/*:700`
+        - `/config/someapp/someapp.conf:700:root:root`
+        - `/config/someotherapp.conf:777:myprogramuser`

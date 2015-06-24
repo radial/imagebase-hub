@@ -147,15 +147,11 @@ case "${1}" in
         cd /config
 
         # Additional ENV variables have already made their way in at this point
-        # via the '/build-env' file or from run time additions if they exist.
+        # via the '/build.env' file or from run time additions if they exist.
         # Process those too.
         get_envs
 
         # Git repo already initialized, merge from here on.
-        git remote add supervisor $SUPERVISOR_REPO &&
-        git pull --no-edit supervisor $SUPERVISOR_BRANCH &&
-            echo "...successfully pulled Supervisor skeleton config."
-
         # Only pull if anything exists. If not, everything was added via 
         # the dockerfile COPY directive.
         if [ "$repoList" != "" ]; then
